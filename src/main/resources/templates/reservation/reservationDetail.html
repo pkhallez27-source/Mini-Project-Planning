@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>예약 상세</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script th:inline="javascript">
+      document.addEventListener('DOMContentLoaded', function () {
+          const maxPerson = /*[[${room.roomMaxPerson}]]*/ 1;
+          const form = document.querySelector('form');
+          const adults = document.querySelector('#rvPersonAdults');
+          const kids = document.querySelector('#rvPersonKids');
+
+          form.addEventListener('submit', function (e) {
+              const total = Number(adults.value) + Number(kids.value);
+              if (total > maxPerson) {
+                  e.preventDefault();
+                  alert('최대 인원 ' + maxPerson + '명을 초과할 수 없습니다.');
+              }
+          });
+
+          const gallery = document.querySelector('.room-gallery');
+          if (!gallery) return;
+
+          const mainImage = gallery.querySelector('.room-main-img');
+          const thumbs = gallery.querySelector('.room-thumbs');
+          const prevBtn = gallery.querySelector('.thumb-prev');
+          const nextBtn = gallery.querySelector('.thumb-next');
+
+          gallery.querySelectorAll('.room-thumb').forEach(function (thumb) {
+              thumb.addEventListener('click', function () {
+                  if (mainImage) mainImage.src = thumb.dataset.src;
+
+                  gallery.querySelectorAll('.room-thumb').forEach(function (item) {
+                      item.classList.remove('border-dark');
+                      item.classList.add('border-light');
+                  });
+
+                  thumb.classList.remove('border-light');
+                  thumb.classList.add('border-dark');
+              });
+          });
+
+          function getThumbStep() {
+              if (!thumbs) return 0;
+              const thumb = thumbs.querySelector('.room-thumb');
+              if (!thumb) return 0;
+              const gap = parseFloat(window.getComputedStyle(thumbs).gap) || 0;
+              return thumb.offsetWidth + gap;
+          }
+
+          if (prevBtn && thumbs) {
+              prevBtn.addEventListener('click', function () {
+                  thumbs.scrollBy({left: -getThumbStep(), behavior: 'smooth'});
+              });
+          }
+
+          if (nextBtn && thumbs) {
+              nextBtn.addEventListener('click', function () {
+                  thumbs.scrollBy({left: getThumbStep(), behavior: 'smooth'});
+              });
+          }
+      });
+  </script>
+
+  <style>
+      .room-img {
+          height: 260px;
+          object-fit: cover;
+      }
+
+      .room-thumb {
+          width: 72px;
+          height: 54px;
+          object-fit: cover;
+          flex-shrink: 0;
+      }
+
+      .reservation-sidebar {
+          margin-top: 110px;
+      }
+  </style>
+</head>
+
+<body class="bg-light">
+<header>
+  <div th:replace="~{layout/header :: subHeader('subre.png')}"></div>
+</header>
+
+<div class="container">
+  <div class="row">
+
+    <!-- 2. 오른쪽 본문 영역 (본인 작업 내용 넣기) -->
+    <main class="col-12 mt-3">
+      <div class="container">
+        <h2 class="fw-bold mb-4 mx-2">예약 상세</h2>
+
+        <div class="card shadow-sm">
+          <div class="row g-0">
+            <div class="col-md-5">
+              <div class="room-gallery p-3">
+                <img th:if="${roomImageList != null and !roomImageList.isEmpty()}" class="room-img room-main-img w-100 rounded" th:src="${roomImageList[0]}" th:alt="|${room.roomName} 객실 이미지|">
+
+                <div th:unless="${roomImageList != null and !roomImageList.isEmpty()}" class="room-img w-100 rounded bg-secondary-subtle d-flex justify-content-center align-items-center text-secondary">
+                  객실 이미지 준비중
+                </div>
+
+                <div th:if="${roomImageList != null and !roomImageList.isEmpty()}" class="d-flex align-items-center gap-2 mt-2">
+                  <button type="button" class="btn btn-sm border-0 p-1 thumb-prev" aria-label="이전 이미지">&#10094;</button>
+
+                  <div class="room-thumbs d-flex gap-2 overflow-hidden flex-grow-1">
+                    <img th:each="imagePath, stat : ${roomImageList}" class="room-thumb rounded border border-2 border-light" th:classappend="${stat.first} ? ' border-dark' : ''" th:src="${imagePath}" th:attr="data-src=${imagePath}" th:alt="|${room.roomName} 이미지 ${stat.count}|" role="button">
+                  </div>
+
+                  <button type="button" class="btn btn-sm border-0 p-1 thumb-next" aria-label="다음 이미지">&#10095;</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-7">
+              <div class="card-body p-4">
+                <h3 class="fw-bold" th:text="${room.roomName}">ROOM NAME</h3>
+                <p class="mb-2">객실 크기 : <span th:text="${room.roomSize}">-</span></p>
+                <p class="mb-2">기준 <span th:text="${room.roomBasicPerson}">0</span>명 / 최대 <span th:text="${room.roomMaxPerson}">0</span>명</p>
+                <p class="mb-3" th:text="${room.roomService}"></p>
+
+                <div class="alert alert-light border mb-0">
+                  <p class="mb-2">예약 기간 : <strong th:text="|${startDate} ~ ${endDate}|">날짜</strong></p>
+                  <p class="mb-0">결제 예정 금액 : <strong th:text="|${#numbers.formatInteger(totalPrice, 0, 'COMMA')}원|">0원</strong></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="m-0">
+
+          <div class="card-body p-4">
+            <form action="/reservation" method="post">
+              <input type="hidden" name="rvRoomIdx" th:value="${room.roomIdx}">
+              <input type="hidden" name="rvStartDate" th:value="${startDate}">
+              <input type="hidden" name="rvEndDate" th:value="${endDate}">
+
+              <h4 class="fw-bold mb-3">예약자 정보</h4>
+
+              <div class="row mb-4">
+                <div class="col-md-6 mb-3 mb-md-0">
+                  <label for="memberName" class="form-label">예약자 이름</label>
+                  <input type="text" class="form-control" id="memberName" th:value="${member.memberName}" readonly>
+                </div>
+                <div class="col-md-6">
+                  <label for="memberPhone" class="form-label">연락처</label>
+                  <input type="text" class="form-control" id="memberPhone" th:value="${member.memberPhone}" readonly>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="memberEmail" class="form-label">이메일</label>
+                <input type="text" class="form-control" id="memberEmail" th:value="${member.memberEmail}" readonly>
+              </div>
+
+              <h4 class="fw-bold mb-3">투숙 인원</h4>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="rvPersonAdults" class="form-label">성인</label>
+                  <input type="number" class="form-control" id="rvPersonAdults" name="rvPersonAdults" min="1" th:max="${room.roomMaxPerson}" value="1" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="rvPersonKids" class="form-label">어린이</label>
+                  <input type="number" class="form-control" id="rvPersonKids" name="rvPersonKids" min="0" th:max="${room.roomMaxPerson}" value="0" required>
+                </div>
+              </div>
+
+              <div class="alert alert-secondary">
+                성인 + 어린이 합계는 최대 <strong th:text="${room.roomMaxPerson}">0</strong>명을 넘을 수 없습니다.
+              </div>
+
+              <div class="d-flex justify-content-end gap-2">
+                <a class="btn btn-outline-secondary" th:href="@{/reservation(startDate=${startDate}, endDate=${endDate})}">예약 취소</a>
+                <button type="submit" class="btn btn-dark">예약하기</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<footer>
+  <div th:replace="~{layout/footer :: footer}"></div>
+</footer>
+
+
+
+
+</body>
+</html>

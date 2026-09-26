@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bitc.aws402.miniproject.mapper.AdminMapper">
+    <!-- 회원 목록 조회 -->
+    <select id="selectMemberList" resultType="MemberDTO">
+        SELECT member_idx AS memberIdx,
+        member_id AS memberId,
+        member_pwd AS memberPwd,
+        member_name AS memberName,
+        member_gender AS memberGender,
+        member_email AS memberEmail,
+        member_phone AS memberPhone,
+        member_level AS memberLevel,
+        member_status AS memberStatus
+        FROM tb_member order by member_idx desc
+    </select>
+
+    <update id="updateMember" parameterType="MemberDTO">
+        update tb_member set
+        member_name=#{memberName},
+        member_pwd=#{memberPwd},
+        member_email=#{memberEmail},
+        member_phone=#{memberPhone},
+        member_gender=#{memberGender},
+        member_level=#{memberLevel},
+        member_status=#{memberStatus}
+        where member_idx=#{memberIdx}
+    </update>
+
+    <!-- 관리자 로그인용 회원 단건 조회 -->
+    <select id="selectMemberById" parameterType="string" resultType="MemberDTO">
+        SELECT member_idx AS memberIdx,
+        member_id AS memberId,
+        member_pwd AS memberPwd,
+        member_name AS memberName,
+        member_email AS memberEmail,
+        member_phone AS memberPhone,
+        member_level AS memberLevel
+        FROM tb_member
+        WHERE member_id = #{memberId}
+    </select>
+
+    <!-- 숙소 목록 조회 -->
+    <select id="selectAccommodationList" resultType="java.util.Map">
+        SELECT room_idx AS accNo,
+        room_name AS accName,
+        room_size AS accLocation,
+        room_price_weekdays AS accPrice
+        FROM tb_room
+    </select>
+
+    <!-- 전체 예약 현황 조회 -->
+    <select id="selectReservationList" resultType="java.util.Map">
+        SELECT r.rv_code AS resNo,
+        m.member_id AS memberId,
+        m.member_name AS resName,
+        ro.room_name AS accName,
+        if(year(now())=year(r.rv_start_date), DATE_FORMAT(r.rv_start_date,'%m/%d'), DATE_FORMAT(r.rv_start_date,'%Y/%m/%d')) AS checkIn,
+        if(year(now())=year(r.rv_end_date), DATE_FORMAT(r.rv_end_date,'%m/%d'), DATE_FORMAT(r.rv_start_date,'%Y/%m/%d')) AS checkOut,
+        r.rv_status AS resStatus
+        FROM tb_reservation r
+        JOIN tb_member m ON r.rv_member_idx = m.member_idx
+        JOIN tb_room ro ON r.rv_room_idx = ro.room_idx
+        order by rv_idx desc
+    </select>
+
+    <!-- Q&A 문의 목록 조회 -->
+    <select id="selectQnaList" resultType="QnaDTO">
+        SELECT
+        b.board_idx AS id,
+        b.board_title AS title,
+        b.board_create_idx AS writer,
+        m.member_id AS memberId,
+        b.board_create_date AS createdAt,
+        b.board_hit_cnt AS cnt,
+        MAX(r.reply_contents) AS answer,
+        (
+        CASE
+        WHEN COUNT(r.reply_idx) > 0 THEN '답변완료'
+        ELSE '미답변'
+        END
+        ) AS answerStatus
+        FROM tb_board b
+        LEFT JOIN tb_member m ON b.board_create_idx = m.member_idx
+        LEFT JOIN tb_reply r ON b.board_idx = r.reply_board_idx
+        GROUP BY b.board_idx, b.board_title, b.board_create_idx, m.member_id, b.board_create_date, b.board_hit_cnt
+        ORDER BY b.board_idx DESC
+    </select>
+
+    <!-- 관리자 Q&A 답변 등록 쿼리 추가 -->
+    <insert id="insertQnaAnswer" parameterType="QnaDTO">
+        INSERT INTO tb_reply (reply_contents, reply_board_idx, reply_create_idx)
+        VALUES (#{answer}, #{id}, #{writer})
+    </insert>
+
+    <select id="selectReplyCount" parameterType="int" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_reply
+        WHERE reply_board_idx = #{id}
+    </select>
+
+    <update id="updateQnaAnswer" parameterType="QnaDTO">
+        UPDATE tb_reply
+        SET reply_contents = #{answer},
+        reply_create_date = NOW()
+        WHERE reply_board_idx = #{id}
+    </update>
+</mapper>

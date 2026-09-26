@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- 숙소 안내 전용 사이드바 조각 -->
+<div th:fragment="roomSidebar" class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+  <!-- 사이드바 제목 -->
+  <div class="px-2 py-2 mb-2 border-bottom">
+    <h5 class="fw-bold text-success m-0">
+      <i class="bi bi-house-door-fill me-2"></i>숙소 안내
+    </h5>
+  </div>
+
+  <!-- 숙소 메뉴 목록 -->
+  <div class="list-group list-group-flush">
+    <!-- 1. 숙소 리스트 -->
+    <a th:href="@{/RoomList}" class="list-group-item list-group-item-action border-0 rounded-3 py-2 px-3 fw-semibold text-secondary">
+      <i class="bi bi-chevron-right me-2 small"></i>숙소 리스트
+    </a>
+
+    <!-- 2. 숙소 1 -->
+    <a th:href="@{/roomA}" class="list-group-item list-group-item-action border-0 rounded-3 py-2 px-3 fw-semibold text-secondary">
+      <i class="bi bi-chevron-right me-2 small"></i>숙소 1
+    </a>
+
+    <!-- 3. 숙소 2 -->
+    <a th:href="@{/roomB}" class="list-group-item list-group-item-action border-0 rounded-3 py-2 px-3 fw-semibold text-secondary">
+      <i class="bi bi-chevron-right me-2 small"></i>숙소 2
+    </a>
+
+    <!-- 4. 숙소 3 -->
+    <a th:href="@{/roomC}" class="list-group-item list-group-item-action border-0 rounded-3 py-2 px-3 fw-semibold text-secondary">
+      <i class="bi bi-chevron-right me-2 small"></i>숙소 3
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

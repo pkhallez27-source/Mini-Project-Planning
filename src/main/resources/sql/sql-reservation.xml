@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bitc.aws402.miniproject.mapper.ReservationMapper">
+
+<!--    선택 기간에 예약 가능한 객실 목록 -->
+<!--    예약중(rv_status = 1)인 기존 예약과 날짜가 겹치지 않는 방만 조회 -->
+    <select id="selectAvailableRoomList" resultType="RoomDTO">
+        SELECT r.room_idx,
+               r.room_name,
+               r.room_size,
+               r.room_basic_person,
+               r.room_max_person,
+               r.room_price_weekdays,
+               r.room_price_weekend,
+               r.room_price_shoulder_weekdays,
+               r.room_price_shoulder_weekend,
+               r.room_price_peak_weekdays,
+               r.room_price_peak_weekend,
+               r.room_service,
+               (
+                   SELECT resource_path
+                   FROM tb_resource
+                   WHERE resource_room_idx = r.room_idx
+                   ORDER BY resource_idx
+                   LIMIT 1
+               ) AS resource_path
+        FROM tb_room r
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM tb_reservation rv
+            WHERE rv.rv_room_idx = r.room_idx
+              AND rv.rv_status = 1
+              AND rv.rv_start_date &lt; CONCAT(#{endDate}, ' 11:00:00')
+              AND rv.rv_end_date &gt; CONCAT(#{startDate}, ' 15:00:00')
+        )
+        ORDER BY r.room_idx
+    </select>
+
+<!--    객실 상세 -->
+    <select id="selectRoomDetail" parameterType="int" resultType="RoomDTO">
+        SELECT r.room_idx,
+               r.room_name,
+               r.room_size,
+               r.room_basic_person,
+               r.room_max_person,
+               r.room_price_weekdays,
+               r.room_price_weekend,
+               r.room_price_shoulder_weekdays,
+               r.room_price_shoulder_weekend,
+               r.room_price_peak_weekdays,
+               r.room_price_peak_weekend,
+               r.room_service,
+               (
+                   SELECT resource_path
+                   FROM tb_resource
+                   WHERE resource_room_idx = r.room_idx
+                   ORDER BY resource_idx
+                   LIMIT 1
+               ) AS resource_path
+        FROM tb_room r
+        WHERE r.room_idx = #{roomIdx}
+    </select>
+
+<!--    예약 상세 화면용 객실 전체 이미지 -->
+    <select id="selectRoomResourceList" parameterType="int" resultType="string">
+        SELECT resource_path
+        FROM tb_resource
+        WHERE resource_room_idx = #{roomIdx}
+        ORDER BY resource_idx
+    </select>
+
+<!--    회원 정보 -->
+    <select id="selectMemberInfo" parameterType="int" resultType="MemberDTO">
+        SELECT member_idx, member_id, member_name, member_phone, member_email
+        FROM tb_member
+        WHERE member_idx = #{memberIdx}
+          AND member_status = 1
+    </select>
+
+    <select id="selectMemberInfoById" parameterType="String" resultType="MemberDTO">
+        SELECT member_idx, member_id, member_name, member_phone, member_email
+        FROM tb_member
+        WHERE member_id = #{memberId}
+          AND member_status = 1
+    </select>
+
+<!--    예약 등록 -->
+    <insert id="insertReservation" parameterType="ReservationDTO">
+        INSERT INTO tb_reservation (
+            rv_code,
+            rv_room_idx,
+            rv_start_date,
+            rv_end_date,
+            rv_person_adults,
+            rv_person_kids,
+            rv_member_idx,
+            rv_date,
+            rv_status,
+            rv_pay
+        )
+        VALUES (
+            #{rvCode},
+            #{rvRoomIdx},
+            CONCAT(#{rvStartDate}, ' 15:00:00'),
+            CONCAT(#{rvEndDate}, ' 11:00:00'),
+            #{rvPersonAdults},
+            #{rvPersonKids},
+            #{rvMemberIdx},
+            NOW(),
+            #{rvStatus},
+            #{rvPay}
+        )
+    </insert>
+
+<!--    예약 완료 페이지 -->
+    <select id="selectReservationComplete" parameterType="String" resultType="ReservationDTO">
+        SELECT rv.rv_idx,
+               rv.rv_code,
+               rv.rv_room_idx,
+               DATE_FORMAT(rv.rv_start_date, '%Y-%m-%d') AS rv_start_date,
+               DATE_FORMAT(rv.rv_end_date, '%Y-%m-%d') AS rv_end_date,
+               rv.rv_person_adults,
+               rv.rv_person_kids,
+               rv.rv_member_idx,
+               DATE_FORMAT(rv.rv_date, '%Y-%m-%d %H:%i') AS rv_date,
+               rv.rv_status,
+               rv.rv_pay,
+               r.room_name,
+               r.room_size,
+               (
+                   SELECT resource_path
+                   FROM tb_resource
+                   WHERE resource_room_idx = r.room_idx
+                   ORDER BY resource_idx
+                   LIMIT 1
+               ) AS resource_path,
+               m.member_name,
+               m.member_phone,
+               m.member_email
+        FROM tb_reservation rv
+        INNER JOIN tb_room r ON rv.rv_room_idx = r.room_idx
+        INNER JOIN tb_member m ON rv.rv_member_idx = m.member_idx
+        WHERE rv.rv_code = #{rvCode}
+    </select>
+
+</mapper>

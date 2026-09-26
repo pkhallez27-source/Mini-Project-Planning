@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restay - 로그인</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+          crossorigin="anonymous"></script>
+
+  <style>
+      body { font-family: 'Noto Sans KR', sans-serif; margin: 0; background: url('https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed; background-size: cover; }
+      .container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: rgba(0,0,0,0.5); }
+      .form-box { background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 12px; width: 350px; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+      h2 { text-align: center; color: #2e7d32; margin-bottom: 25px; }
+      .form-group { margin-bottom: 15px; }
+      label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+      input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+      .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+      .btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; }
+      .btn-primary { background-color: #2e7d32; color: white; }
+      .btn-secondary { background-color: #757575; color: white; }
+  </style>
+
+  <script>
+
+  </script>
+</head>
+<body>
+<div class="container">
+  <div class="form-box">
+    <h2>Restay 로그인</h2>
+    <form th:action="@{/member/login}" method="post">
+      <!-- redirectURL 유지를 위한 hidden 필드 -->
+      <input type="hidden" name="redirectURL" th:value="${redirectURL}">
+
+      <div class="form-group">
+        <label>아이디</label>
+        <input type="text" name="memberId" required placeholder="아이디 입력">
+      </div>
+      <div class="form-group">
+        <label>비밀번호</label>
+        <input type="password" name="memberPwd" required placeholder="비밀번호 입력">
+      </div>
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">로그인</button>
+        <a th:href="@{/member/signup}" class="btn btn-secondary">회원가입</a>
+      </div>
+    </form>
+  </div>
+</div>
+<script th:if="${msg}">alert("[[${msg}]]");</script>
+<script th:if="${error}">alert("[[${error}]]");</script>
+</body>
+</html>

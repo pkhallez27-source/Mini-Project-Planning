@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- 부대시설 안내 전용 사이드바 조각 -->
+<div th:fragment="facilitiesSidebar" class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+  <!-- 사이드바 제목 -->
+  <div class="px-2 py-2 mb-2 border-bottom">
+    <h5 class="fw-bold text-success m-0">
+      <i class="bi bi-star-fill me-2"></i>부대시설 안내
+    </h5>
+  </div>
+
+  <!-- 부대시설 안내 단일 메뉴 -->
+  <div class="list-group list-group-flush">
+    <a th:href="@{/facilities}" class="list-group-item list-group-item-action border-0 rounded-3 py-2 px-3 fw-semibold text-secondary">
+      <i class="bi bi-chevron-right me-2 small"></i>부대시설 안내
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

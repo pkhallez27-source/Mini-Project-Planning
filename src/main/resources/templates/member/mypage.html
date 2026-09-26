@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restay - 개인정보 수정</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+          crossorigin="anonymous"></script>
+
+  <style>
+      body { font-family: 'Noto Sans KR', sans-serif; background-color: #f4f6f8; }
+      .container { max-width: 600px; margin: 50px auto; }
+      .card { background: #fff; border-radius: 8px; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+      .title { font-size: 22px; font-weight: 700; color: #0d5c3a; margin-bottom: 30px; text-align: center; border-bottom: 2px solid #0d5c3a; padding-bottom: 15px; }
+      .btn-custom { background-color: #0d5c3a; color: white; width: 100%; padding: 10px; font-weight: 500; }
+      .btn-custom:hover { background-color: #147a4e; color: white; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h2 class="title">개인정보 수정</h2>
+
+    <form th:action="@{/member/update}" method="post">
+      <!-- 아이디는 수정 불가하므로 readonly 처리 -->
+      <div class="mb-3">
+        <label class="form-label fw-bold">아이디</label>
+        <input type="text" class="form-control" th:value="${user.memberId}" readonly style="background-color: #e9ecef;">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-bold">새 비밀번호</label>
+        <input type="password" name="memberPwd" class="form-control" placeholder="변경할 경우에만 입력하세요">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-bold">이름</label>
+        <input type="text" name="memberName" class="form-control" th:value="${user.memberName}" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-bold">이메일</label>
+        <input type="email" name="memberEmail" class="form-control" th:value="${user.memberEmail}" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-bold">전화번호</label>
+        <input type="text" name="memberPhone" class="form-control" th:value="${user.memberPhone}">
+      </div>
+
+      <div class="d-grid gap-2 mt-4">
+        <button type="submit" class="btn btn-custom">수정 완료</button>
+        <a href="/" class="btn btn-secondary">메인으로 가기</a>
+      </div>
+    </form>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<footer th:fragment="footer" class="bg-dark text-white-50 py-4 mt-5">
+    <div class="container text-center small position-relative">
+        <div class="d-flex justify-content-center gap-3 mb-2">
+            <a href="#" class="text-white-50 text-decoration-none">개인정보처리방침</a> |
+            <a href="#" class="text-white-50 text-decoration-none">이용약관</a> |
+            <a href="#" class="text-white-50 text-decoration-none">사이트맵</a>
+        </div>
+        <p class="mb-1">경상북도 울진군 근남면 울진로 1234-56 | 예약문의: 054-123-4567</p>
+        <p class="mb-0">Copyright © 2026 Restay 캠핑장. All rights reserved.</p>
+
+        <!-- 오른쪽 끝에 배치된 관리자 버튼 -->
+        <div class="position-absolute end-0 bottom-0 mb-2">
+            <a th:href="@{/admin/login}" class="btn btn-outline-secondary btn-sm text-white-50 border-secondary">관리자</a>
+        </div>
+    </div>
+</footer>
+</html>

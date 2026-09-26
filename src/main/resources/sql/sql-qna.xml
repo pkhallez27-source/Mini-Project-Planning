@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bitc.aws402.miniproject.mapper.QnaMapper">
+    <select id="selectQnaList" resultType="QnaDTO">
+        SELECT
+        b.board_idx AS id,
+        b.board_title AS title,
+        b.board_create_idx AS writer,
+        m.member_id AS memberId,
+        b.board_create_date AS createdAt,
+        b.board_hit_cnt AS cnt,
+        MAX(r.reply_contents) AS answer,
+        (
+        CASE
+        WHEN COUNT(r.reply_idx) > 0 THEN '답변완료'
+        ELSE '미답변'
+        END
+        ) AS answerStatus
+        FROM tb_board b
+        LEFT JOIN tb_member m ON b.board_create_idx = m.member_idx
+        LEFT JOIN tb_reply r ON b.board_idx = r.reply_board_idx
+        GROUP BY b.board_idx, b.board_title, b.board_create_idx, m.member_id, b.board_create_date, b.board_hit_cnt
+        ORDER BY b.board_idx DESC
+    </select>
+
+    <!-- Q&A 글 등록 -->
+    <insert id="insertQna" parameterType="QnaDTO">
+        INSERT INTO tb_board (board_title, board_contents, board_create_idx)
+        VALUES (#{title}, #{content}, #{writer})
+    </insert>
+
+    <!-- Q&A 상세 조회 -->
+    <select id="selectQnaDetail" parameterType="int" resultType="QnaDTO">
+        SELECT
+        b.board_idx AS id,
+        b.board_title AS title,
+        b.board_contents AS content,
+        b.board_create_idx AS writer,
+        m.member_id AS memberId,
+        b.board_create_date AS createdAt,
+        b.board_hit_cnt AS cnt,
+        r.reply_contents AS answer,
+        r.reply_create_date AS replyCreatedAt
+        FROM tb_board b
+        LEFT JOIN tb_member m ON b.board_create_idx = m.member_idx
+        LEFT JOIN tb_reply r ON b.board_idx = r.reply_board_idx
+        WHERE b.board_idx = #{id}
+        ORDER BY r.reply_idx DESC
+        LIMIT 1
+    </select>
+
+    <!--    <select id="selectQnaReply" parameterType="int" resultType="ReplyDTO">-->
+    <!--        select-->
+    <!--        reply_idx,-->
+    <!--        reply_contents,-->
+    <!--        reply_board_idx,-->
+    <!--        reply_create_idx,-->
+    <!--        reply_create_date-->
+    <!--        from tb_reply join tb_member on (reply_create_idx=member_idx)-->
+    <!--        where reply_board_idx = #{boardIdx}-->
+    <!--        order by reply_idx desc limit 1-->
+    <!--    </select>-->
+
+    <!-- 조회수 증가 -->
+    <update id="updateHitCount" parameterType="int">
+        UPDATE tb_board SET board_hit_cnt = board_hit_cnt + 1 WHERE board_idx = #{id}
+    </update>
+
+    <!-- Q&A 수정 -->
+    <update id="updateQna" parameterType="QnaDTO">
+        UPDATE tb_board
+        SET board_title = #{title},
+        board_contents = #{content}
+        WHERE board_idx = #{id}
+    </update>
+
+    <!-- Q&A 삭제 -->
+    <delete id="deleteQna" parameterType="int">
+        DELETE FROM tb_board
+        WHERE board_idx = #{id}
+    </delete>
+</mapper>

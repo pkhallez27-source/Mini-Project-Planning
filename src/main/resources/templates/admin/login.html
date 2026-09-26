@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restay - 관리자 로그인</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+            crossorigin="anonymous"></script>
+
+    <style>
+        body { background-color: #666; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Noto Sans KR', sans-serif; }
+        .login-box { background: #fff; padding: 40px; border-radius: 8px; width: 320px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); text-align: center; }
+        h2 { color: #cc0000; margin-bottom: 25px; font-size: 22px; }
+        .form-control { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn-login { width: 100%; padding: 11px; background-color: #cc0000; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 15px; }
+        .btn-login:hover { background-color: #b00000; }
+
+        /* 메인 화면 돌아가기 텍스트 버튼 스타일 */
+        .back-home {
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+        }
+        .back-home:hover {
+            color: #333;
+            text-decoration: underline;
+        }
+    </style>
+
+    <script>
+
+    </script>
+</head>
+<body>
+<div class="login-box">
+    <h2>관리자 시스템 접속</h2>
+
+    <!-- 관리자 로그인 폼 -->
+    <form th:action="@{/admin/login}" method="post">
+        <input type="text" name="memberId" class="form-control" placeholder="관리자 아이디" required>
+        <input type="password" name="memberPwd" class="form-control" placeholder="관리자 비밀번호" required>
+        <button type="submit" class="btn-login">관리자 로그인</button>
+    </form>
+
+    <!-- 관리자 로그인 버튼 밑에 추가된 메인 화면 돌아가기 링크 -->
+    <a th:href="@{/}" class="back-home">메인 화면 돌아가기</a>
+</div>
+<script th:if="${error}">alert("[[${error}]]");</script>
+</body>
+</html>

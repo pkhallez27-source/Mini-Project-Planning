@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--    추형호 -->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bitc.aws402.miniproject.mapper.MemberMapper">
+
+    <!-- 회원가입 -->
+    <select id="checkIdExist" parameterType="String" resultType="int">
+        select count(*) cnd
+        from tb_member
+        where member_id=#{memberId}
+    </select>
+
+    <insert id="insertMember" parameterType="MemberDTO">
+        INSERT INTO tb_member (
+        member_id,
+        member_pwd,    <!-- 컬럼명 스펠링 확인 (member_pw인지 member_pwd인지) -->
+        member_name,
+        member_gender,
+        member_phone,
+        member_email
+        ) VALUES (
+        #{memberId},
+        #{memberPwd},
+        #{memberName},
+        #{memberGender},
+        #{memberPhone},
+        #{memberEmail}
+        )
+    </insert>
+
+    <select id="selectMemberByUserId" parameterType="String" resultType="MemberDTO">
+        SELECT
+        member_idx,
+        member_id,
+        member_pwd,
+        member_phone,
+        member_name,
+        member_gender,
+        member_phone,
+        member_email,
+        member_join_date,
+        member_level,
+        member_status
+        FROM tb_member
+        WHERE member_id = #{memberId}
+    </select>
+
+    <!-- [추가] 마이페이지 회원 정보 단건 조회 -->
+    <select id="selectUserInfo" parameterType="String" resultType="MemberDTO">
+        SELECT
+        member_idx,
+        member_id,
+        member_pwd,
+        member_name,
+        member_gender,
+        member_phone,
+        member_email,
+        member_join_date,
+        member_level,
+        member_status
+        FROM tb_member
+        WHERE member_id = #{memberId}
+    </select>
+
+    <!-- [추가] 회원 정보 수정 -->
+    <update id="updateUserInfo" parameterType="MemberDTO">
+        UPDATE tb_member
+        SET
+        <if test="memberPwd != null and memberPwd != ''">
+            member_pwd = #{memberPwd},
+        </if>
+        member_name = #{memberName},
+        member_email = #{memberEmail},
+        member_phone = #{memberPhone}
+        WHERE member_id = #{memberId}
+    </update>
+
+    <select id="selectAllMembers" resultType="MemberDTO">
+        SELECT
+        member_idx,
+        member_id,
+        member_pwd,
+        member_name,
+        member_gender,
+        member_phone,
+        member_email,
+        member_join_date,
+        member_level,
+        member_status
+        FROM tb_member
+        ORDER BY member_idx DESC
+    </select>
+
+    <select id="selectAllReservations" resultType="ReservationDTO">
+        SELECT
+        rv_idx,
+        rv_code,
+        rv_room_idx,
+        rv_start_date,
+        rv_end_date,
+        rv_person_adults,
+        rv_person_kids,
+        rv_member_idx,
+        rv_date,
+        rv_status,
+        rv_pay
+        FROM tb_reservation
+        ORDER BY rv_idx DESC
+    </select>
+</mapper>

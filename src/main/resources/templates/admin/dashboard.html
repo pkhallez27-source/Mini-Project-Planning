@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restay - 관리자 대시보드</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.20.0/dist/axios.min.js"></script>
+
+    <style>
+        :root {
+            --primary-green: #198754; /* Bootstrap success 컬러와 동일 */
+            --body-bg: #f5f6f8;
+        }
+
+        body {
+            background-color: var(--body-bg);
+            font-family: 'Noto Sans KR', sans-serif;
+            padding-bottom: 50px;
+        }
+
+        /* 팀장님 헤더와 동일한 스타일을 적용한 관리자 상단 헤더 바 */
+        .admin-navbar {
+            background-color: #ffffff;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            margin-bottom: 40px;
+        }
+
+        .sidebar {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .user-profile-box {
+            background-color: var(--primary-green);
+            color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .nav-menu .menu-btn {
+            width: 100%;
+            text-align: left;
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            background-color: #ffffff;
+            color: #333333;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .nav-menu .menu-btn:hover {
+            background-color: var(--primary-green);
+            color: #ffffff;
+            border-color: var(--primary-green);
+        }
+
+        .nav-menu .menu-btn.active {
+            background-color: var(--primary-green) !important;
+            color: #ffffff !important;
+            border-color: var(--primary-green) !important;
+            font-weight: 600;
+        }
+
+        .content-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            min-height: 480px;
+        }
+
+        .empty-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 380px;
+            color: #888888;
+        }
+
+        .active > .page-link-custom {
+            background-color: var(--primary-green);
+            border-color: var(--primary-green);
+        }
+
+        .page-link-custom {
+            color: var(--primary-green);
+        }
+    </style>
+    <script>
+        let memberPageNum = 1;
+
+        window.addEventListener("DOMContentLoaded", function () {
+            const url = new URL(window.location.href);
+            const m = url.searchParams.get("m")
+            if (m != null) {
+                switch (m) {
+                    case "1":
+                        document.querySelector("#menu1").click();
+                        break;
+                    case "2":
+                        document.querySelector("#menu2").click();
+                        break;
+                    case "3":
+                        document.querySelector("#menu3").click();
+                        break;
+                    case "4":
+                        document.querySelector("#menu4").click();
+                        break;
+                }
+
+            }
+
+            const addMember = document.querySelector("#add-member");
+            addMember.addEventListener("click", function () {
+                const memberModal = new bootstrap.Modal(document.querySelector('#member-modal'));
+                const memberModalTitle = document.querySelector("#member-modal-title");
+                memberModalTitle.innerText = '회원 추가';
+                const memberModalIdx = document.querySelector("#member-modal-idx");
+                memberModalIdx.value = "";
+                const memberModalId = document.querySelector("#member-modal-id");
+                memberModalId.value = "";
+                memberModalId.disabled = false;
+                const memberModalPwd = document.querySelector("#member-modal-pwd");
+                memberModalPwd.value = "";
+                const memberModalName = document.querySelector("#member-modal-name");
+                memberModalName.value = "";
+                const memberModalPhone = document.querySelector("#member-modal-phone");
+                memberModalPhone.value = "";
+                const memberModalEmail = document.querySelector("#member-modal-email");
+                memberModalEmail.value = "";
+                const memberModalGender = document.querySelector("#member-modal-gender");
+                const genderSelect = memberModalGender.querySelectorAll('option');
+                genderSelect.forEach(function (option) {
+                    option.selected = false;
+                })
+                const memberModalLevel = document.querySelector("#member-modal-level");
+                const levelSelect = memberModalLevel.querySelectorAll('option');
+                levelSelect.forEach(function (option) {
+                    option.selected = false;
+                })
+                const memberModalStatus = document.querySelector("#member-modal-status");
+                const statusSelect = memberModalStatus.querySelectorAll('option');
+                statusSelect.forEach(function (option) {
+                    option.selected = false;
+                })
+                const memberModalEdit = document.querySelector("#member-modal-edit");
+                const memberModalAdd = document.querySelector("#member-modal-add");
+                memberModalEdit.classList.add('d-none');
+                memberModalAdd.classList.remove('d-none');
+                memberModal.show();
+
+                memberModalAdd.addEventListener('click', function () {
+                    axios.post("/admin/memberInsert",
+                        {
+                            memberId: memberModalId.value,
+                            memberPwd: memberModalPwd.value,
+                            memberName: memberModalName.value,
+                            memberPhone: memberModalPhone.value,
+                            memberEmail: memberModalEmail.value,
+                            memberGender: memberModalGender.value,
+                            memberLevel: memberModalLevel.value,
+                            memberStatus: memberModalStatus.value,
+                        }
+                    ).then(function (res) {
+                        const data = res.data;
+                        console.log(data);
+                        alert("추가완료");
+                        memberModal.hide();
+                        memberPageNum = 1;
+                        selectMemberListPage(memberPageNum);
+                        // location.replace("/admin/dashboard?m=1");
+                    }).catch(function (error) {
+                        alert("추가실패");
+                        console.log(error);
+                    })
+                });
+            });
+        });
+
+        function showTab(tabId, element) {
+            const allTabs = document.querySelectorAll('.tab-content');
+            allTabs.forEach(tab => tab.classList.add('d-none'));
+
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) {
+                targetTab.classList.remove('d-none');
+            }
+
+            const allButtons = document.querySelectorAll('.menu-btn');
+            allButtons.forEach(btn => btn.classList.remove('active'));
+
+            element.classList.add('active');
+
+            if (tabId === "memberTab") {
+                selectMemberListPage(memberPageNum);
+            }
+        }
+
+        function showMemberDetail(member) {
+            console.log(member);
+            const memberModal = new bootstrap.Modal(document.querySelector('#member-modal'));
+            const memberModalTitle = document.querySelector("#member-modal-title");
+            memberModalTitle.innerText = '회원 정보 수정';
+            const memberModalIdx = document.querySelector("#member-modal-idx");
+            memberModalIdx.value = member.memberIdx;
+            const memberModalId = document.querySelector("#member-modal-id");
+            memberModalId.value = member.memberId;
+            memberModalId.disabled = true;
+            const memberModalPwd = document.querySelector("#member-modal-pwd");
+            memberModalPwd.value = member.memberPwd;
+            const memberModalName = document.querySelector("#member-modal-name");
+            memberModalName.value = member.memberName;
+            const memberModalPhone = document.querySelector("#member-modal-phone");
+            memberModalPhone.value = member.memberPhone;
+            const memberModalEmail = document.querySelector("#member-modal-email");
+            memberModalEmail.value = member.memberEmail;
+            const memberModalGender = document.querySelector("#member-modal-gender");
+            const genderSelect = memberModalGender.querySelector('option[value="' + member.memberGender + '"]');
+            genderSelect.selected = true;
+            const memberModalLevel = document.querySelector("#member-modal-level");
+            const levelSelect = memberModalLevel.querySelector('option[value="' + member.memberLevel + '"]');
+            levelSelect.selected = true;
+            const memberModalStatus = document.querySelector("#member-modal-status");
+            const statusSelect = memberModalStatus.querySelector('option[value="' + member.memberStatus + '"]');
+            statusSelect.selected = true;
+            const memberModalEdit = document.querySelector("#member-modal-edit");
+            const memberModalAdd = document.querySelector("#member-modal-add");
+            memberModalEdit.classList.remove('d-none');
+            memberModalAdd.classList.add('d-none');
+            memberModal.show();
+
+            memberModalEdit.addEventListener('click', function () {
+                axios.put("/admin/memberUpdate",
+                    {
+                        memberIdx: memberModalIdx.value,
+                        memberId: memberModalId.value,
+                        memberPwd: memberModalPwd.value,
+                        memberName: memberModalName.value,
+                        memberPhone: memberModalPhone.value,
+                        memberEmail: memberModalEmail.value,
+                        memberGender: memberModalGender.value,
+                        memberLevel: memberModalLevel.value,
+                        memberStatus: memberModalStatus.value,
+                    }
+                ).then(function (res) {
+                    alert("변경완료");
+                    memberModal.hide();
+                    memberPageNum = 1;
+                    selectMemberListPage(memberPageNum);
+                    // location.replace("/admin/dashboard?m=1");
+                }).catch(function (error) {
+                    alert("변경실패");
+                    console.log(error);
+                })
+            });
+        }
+
+        function selectMemberListPage(pageNum) {
+            memberPageNum = pageNum;
+            axios.get("/admin/memberSelect", {
+                params: {
+                    pageNum: pageNum
+                }
+            }).then(function (res) {
+                const data = res.data;
+                const list = data.list;
+                const tbody = document.querySelector("#memberTab tbody");
+
+                if (list.length > 0) {
+                    let tag = '';
+                    list.forEach(function (member) {
+                        tag += `<tr onclick='showMemberDetail(${JSON.stringify(member)})'>`; //-- 에러 부분 수정 필요
+                        tag += '<td>' + member.memberId + '</td>';
+                        tag += '<td>' + member.memberName + '</td>';
+                        tag += '<td>' + member.memberEmail + '</td>';
+                        tag += '<td>' + member.memberPhone + '</td>';
+                        switch (member.role) {
+                            case 'USER':
+                                tag += '<td><span class="badge bg-secondary">USER</span></td>';
+                                break;
+                            case 'ADMIN':
+                                tag += '<td><span class="badge bg-primary">ADMIN</span></td>';
+                                break;
+                        }
+                        switch (member.memberStatus) {
+                            case 1 :
+                                tag += '<td><span class="badge bg-success">정상</span></td>';
+                                break;
+                            case 0 :
+                                tag += '<td><span class="badge bg-secondary">탈퇴</span></td>';
+                                break;
+                        }
+                        tag += '</tr>';
+                    });
+
+                    tbody.innerHTML = tag;
+                    const memberPagination = document.querySelector("#member-pagination");
+                    memberPagination.innerHTML = '';
+
+                    const prevLi = document.createElement("li");
+                    prevLi.classList.add('page-item');
+                    if (data.prePage == 0) prevLi.classList.add('disabled');
+                    const prevA = document.createElement("a");
+                    prevA.classList.add('page-link', "page-link-custom");
+                    prevA.href = 'javascript:selectMemberListPage("' + data.prePage + '")';
+                    prevA.text = 'ᐊ';
+                    prevLi.appendChild(prevA);
+                    memberPagination.appendChild(prevLi);
+
+                    for (let i = data.navigateFirstPage; i <= data.navigateLastPage; i++) {
+                        const pageLi = document.createElement("li");
+                        pageLi.classList.add('page-item');
+                        if (i == data.pageNum) pageLi.classList.add('active');
+                        const pageA = document.createElement("a");
+                        pageA.classList.add('page-link', "page-link-custom");
+                        pageA.href = 'javascript:selectMemberListPage("' + i + '")';
+                        pageA.text = i;
+                        pageLi.appendChild(pageA);
+                        memberPagination.appendChild(pageLi);
+                    }
+
+                    const nextLi = document.createElement("li");
+                    nextLi.classList.add('page-item');
+                    if (data.nextPage == 0) nextLi.classList.add('disabled');
+                    const nextA = document.createElement("a");
+                    nextA.classList.add('page-link', "page-link-custom");
+                    nextA.href = 'javascript:selectMemberListPage("' + data.nextPage + '")';
+                    nextA.text = 'ᐅ';
+                    nextLi.appendChild(nextA);
+                    memberPagination.appendChild(nextLi);
+                }
+                // console.log(data);
+            }).catch(function (error) {
+                console.log(error);
+            });
+        }
+    </script>
+</head>
+<body>
+<!-- 팀장님 헤더 디자인과 동일하게 맞춘 상단 네비게이션 바 -->
+<nav class="navbar navbar-expand-lg navbar-light admin-navbar">
+    <div class="container">
+        <!-- 1번 사진과 똑같은 아이콘 + restay 로고 폰트 -->
+        <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-3 text-success" th:href="@{/}">
+            <i class="bi bi-tree-fill fs-2"></i> Restay
+        </a>
+
+        <!-- 중앙 관리자 페이지 타이틀 영역 -->
+        <div class="text-center mx-auto d-none d-lg-block">
+            <h5 class="fw-bold mb-0 text-dark">관리자 페이지</h5>
+            <small class="text-muted">전체 예약 현황, 회원 정보 및 Q&A 문의를 관리합니다.</small>
+        </div>
+
+        <!-- 우측 로그아웃 버튼 -->
+        <div class="d-flex">
+            <a th:href="@{/admin/logout}" class="btn btn-success rounded-pill px-4 text-white fw-semibold">
+                로그아웃
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+    <div class="row g-4">
+
+        <!-- 좌측 사이드바 영역 -->
+        <div class="col-12 col-md-3">
+            <div class="sidebar">
+                <div class="user-profile-box text-center">
+                    <i class="bi bi-person-circle fs-1 mb-2"></i>
+                    <h5 class="mb-1"
+                        th:text="${session.adminUser != null ? session.adminUser.memberName + '님' : '관리자님'}">
+                        관리자님</h5>
+                    <small class="opacity-75">환영합니다!</small>
+                </div>
+
+                <!-- 좌측 버튼 메뉴 -->
+                <div class="nav-menu">
+                    <button type="button" class="menu-btn" id="menu1" onclick="showTab('memberTab', this)">
+                        <i class="bi bi-person me-2"></i> 회원 관리
+                    </button>
+
+                    <button type="button" class="menu-btn" id="menu2" onclick="showTab('accTab', this)">
+                        <i class="bi bi-building me-2"></i> 회원 / 숙소 목록 조회
+                    </button>
+
+                    <button type="button" class="menu-btn" id="menu3" onclick="showTab('resTab', this)">
+                        <i class="bi bi-calendar-check me-2"></i> 전체 예약 현황 조회
+                    </button>
+
+                    <button type="button" class="menu-btn" id="menu4" onclick="showTab('qnaTab', this)">
+                        <i class="bi bi-chat-dots me-2"></i> Q&A 문의 관리
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측 메인 콘텐츠 영역 -->
+        <main class="col-12 col-md-9">
+            <div class="content-card">
+
+                <!-- 0. 대기 상태 -->
+                <div id="defaultTab" class="tab-content empty-placeholder">
+                    <i class="bi bi-cursor fs-1 mb-3 text-secondary"></i>
+                    <h5 class="fw-normal">좌측 메뉴를 선택하시면 상세 정보가 표시됩니다.</h5>
+                </div>
+
+                <!-- 1. 회원 관리 리스트 -->
+                <div id="memberTab" class="tab-content d-none">
+                    <h3 class="fw-bold mb-4 text-dark">회원 관리</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th>회원 ID</th>
+                                <th>이름</th>
+                                <th>이메일</th>
+                                <th>연락처</th>
+                                <th>권한</th>
+                                <th>상태</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="member : ${members}" th:if="${members != null and !members.isEmpty()}"
+                                th:onclick="showMemberDetail([[${member}]])">
+                                <td th:text="${member.memberId != null ? member.memberId : '-'}">user01</td>
+                                <td th:text="${member.memberName != null ? member.memberName : '-'}">홍길동</td>
+                                <td th:text="${member.memberEmail != null ? member.memberEmail : '-'}">
+                                    user@example.com
+                                </td>
+                                <td th:text="${member.memberPhone != null ? member.memberPhone : '-'}">010-0000-0000
+                                </td>
+                                <td th:switch="${member.role}">
+                                    <span class="badge bg-secondary" th:case="USER">USER</span>
+                                    <span class="badge bg-primary" th:case="ADMIN">ADMIN</span>
+                                </td>
+                                <td th:switch="${member.memberStatus}">
+                                    <span class="badge bg-success" th:case="1">정상</span>
+                                    <span class="badge bg-secondary" th:case="0">탈퇴</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${members == null or #lists.isEmpty(members)}">
+                                <td colspan="5" class="text-center py-5 text-muted">등록된 회원 정보가 없습니다.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div class="text-end mt-4">
+                            <button type="button" class="btn btn-success" id="add-member">회원 추가</button>
+                        </div>
+                        <div class="mt-3">
+                            <ul class="pagination justify-content-center" id="member-pagination">
+                                <!--                <li class="page-item" th:classappend="${list.getPrePage()==0}?'disabled'">-->
+                                <!--                  <a href="#" class="page-link page-link-custom" th:href="@{/qna/list(pageNum=${list.getPrePage()})}">ᐊ</a>-->
+                                <!--                </li>-->
+                                <!--                <li class="page-item" th:each="page:${#numbers.sequence(list.getNavigateFirstPage(), list.getNavigateLastPage())}" th:classappend="${page==list.getPageNum()} ? 'active'">-->
+                                <!--                  <a href="#" class="page-link page-link-custom" th:href="@{/qna/list(pageNum=${page})}" th:text="${page}"></a>-->
+                                <!--                </li>-->
+                                <!--                <li class="page-item" th:classappend="${list.getNextPage()==0}?'disabled'">-->
+                                <!--                  <a href="#" class="page-link page-link-custom" th:href="@{/qna/list(pageNum=${list.getNextPage()})}">ᐅ</a>-->
+                                <!--                </li>-->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 회원 / 숙소 목록 조회 -->
+                <div id="accTab" class="tab-content d-none">
+                    <h3 class="fw-bold mb-4 text-dark">회원 / 숙소 목록 조회</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th>숙소 번호</th>
+                                <th>숙소명</th>
+                                <th>위치</th>
+                                <th>가격</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="item : ${accommodations}"
+                                th:if="${accommodations != null and !accommodations.isEmpty()}">
+                                <td th:text="${item?.accNo ?: '-'}">H-001</td>
+                                <td th:text="${item?.accName ?: '-'}">제주 오션뷰</td>
+                                <td th:text="${item?.accLocation ?: '-'}">제주도 서귀포시</td>
+                                <td th:text="${item?.accPrice != null ? #numbers.formatInteger(item.accPrice, 0, 'COMMA') + '원' : '-'}">
+                                    150,000원
+                                </td>
+                            </tr>
+                            <tr th:if="${accommodations == null or accommodations.isEmpty()}">
+                                <td colspan="5" class="text-center py-5 text-muted">등록된 숙소 정보가 없습니다.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. 전체 예약 현황 조회 리스트 -->
+                <div id="resTab" class="tab-content d-none">
+                    <h3 class="fw-bold mb-4 text-dark">전체 예약 현황</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th>회원 ID</th>
+                                <th>예약자명</th>
+                                <th>숙소명</th>
+                                <th>체크인</th>
+                                <th>체크아웃</th>
+                                <th>예약번호</th>
+                                <th>상태</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${reservationList != null and !reservationList.isEmpty()}"
+                                th:each="res : ${reservationList}">
+                                <td th:text="${res?.memberId}">user01</td>
+                                <td th:text="${res?.resName}">홍길동</td>
+                                <td th:text="${res?.accName}">숙소명</td>
+                                <td th:text="${res?.checkIn}">2026-00-00</td>
+                                <td th:text="${res?.checkOut}">2026-00-00</td>
+                                <td th:text="${res?.resNo}">R-001</td>
+                                <td th:switch="${res.resStatus}">
+                                    <span class="badge bg-danger" th:case="0">Cancel</span>
+                                    <span class="badge bg-success" th:case="1">Reserved</span>
+                                    <span class="badge bg-primary" th:case="2">Complete</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${reservationList == null or reservationList.isEmpty()}">
+                                <td colspan="7" class="text-center py-5 text-muted">예약 내역이 존재하지 않습니다.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 4. Q&A 문의 관리 탭 영역 -->
+                <div id="qnaTab" class="tab-content d-none">
+                    <h3 class="fw-bold mb-4 text-dark">Q&A 문의 관리</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-center">
+                            <thead class="table-light">
+                            <tr>
+                                <th>번호</th>
+                                <th>제목</th>
+                                <th>작성자</th>
+                                <th>등록일</th>
+                                <th>답변 상태</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${qnaList != null and !qnaList.isEmpty()}" th:each="qna : ${qnaList}">
+                                <td th:text="${qna.id}">1</td>
+                                <td class="text-start">
+                                    <a th:href="@{/admin/qna/{id}(id=${qna.id})}" th:text="${qna.title}"
+                                       class="text-decoration-none text-dark fw-bold">제목</a>
+                                </td>
+                                <td th:text="${qna.memberId}">작성자</td>
+                                <td th:text="${qna.createdAt != null ? qna.createdAt : '-'}">2026-09-01</td>
+                                <td>
+                                    <span th:if="${qna.answer != null and qna.answer != ''}"
+                                          class="badge-done">답변완료</span>
+                                    <span th:unless="${qna.answer != null and qna.answer != ''}"
+                                          class="badge-none">미답변</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${qnaList == null or qnaList.isEmpty()}">
+                                <td colspan="5" class="text-center py-5 text-muted">등록된 Q&A 문의 내역이 없습니다.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" id="member-modal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="member-modal-title">회원 정보 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="member-form" method="post">
+                <input type="hidden" name="_method" value="put">
+                <input type="hidden" name="memberModalIdx" id="member-modal-idx">
+                <div class="modal-body">
+                    <div class="form-floating">
+                        <input type="text" id="member-modal-id" class="form-control" name="memberId">
+                        <label for="member-modal-id" class="form-label">회원 ID</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="password" id="member-modal-pwd" class="form-control" name="memberPwd">
+                        <label for="member-modal-pwd" class="form-label">비밀번호</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="text" id="member-modal-name" class="form-control" name="memberName">
+                        <label for="member-modal-name" class="form-label">이름</label>
+                    </div>
+                    <div class="form-floating">
+                        <select class="form-select" id="member-modal-gender" name="memberGender">
+                            <option class="select-option" value="M">남성</option>
+                            <option class="select-option" value="F">여성</option>
+                        </select>
+                        <label for="member-modal-gender" class="form-label">성별</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="text" id="member-modal-phone" class="form-control" name="memberPhone">
+                        <label for="member-modal-phone" class="form-label">연락처</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="text" id="member-modal-email" class="form-control" name="memberEmail">
+                        <label for="member-modal-email" class="form-label">이메일</label>
+                    </div>
+                    <div class="form-floating">
+                        <select class="form-select" id="member-modal-level" name="memberGender">
+                            <option class="select-option" value="0">User</option>
+                            <option class="select-option" value="99">Admin</option>
+                        </select>
+                        <label for="member-modal-level" class="form-label">권한</label>
+                    </div>
+                    <div class="form-floating">
+                        <select class="form-select" id="member-modal-status" name="memberStatus">
+                            <option class="select-option" value="1">정상</option>
+                            <option class="select-option" value="0">탈퇴</option>
+                        </select>
+                        <label for="member-modal-status" class="form-label">상태</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary d-none" id="member-modal-edit">수정</button>
+                    <button type="button" class="btn btn-primary d-none" id="member-modal-add">추가</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

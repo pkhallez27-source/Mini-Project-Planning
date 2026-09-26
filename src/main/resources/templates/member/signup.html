@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restay - 회원가입</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+            crossorigin="anonymous"></script>
+
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; margin: 0; background: url('https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed; background-size: cover; }
+        .container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: rgba(0,0,0,0.5); }
+        .form-box { background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 12px; width: 380px; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+        h2 { text-align: center; color: #2e7d32; margin-bottom: 25px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; background-color: #2e7d32; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn:hover { background-color: #1b5e20; }
+    </style>
+
+    <script>
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="form-box">
+        <h2>Restay 회원가입</h2>
+        <form th:action="@{/member/signup}" method="post">
+            <div class="form-group">
+                <label>아이디 *</label>
+                <input type="text" name="memberId" required placeholder="아이디 입력">
+            </div>
+            <div class="form-group">
+                <label>비밀번호 *</label>
+                <input type="password" name="memberPwd" required placeholder="비밀번호 입력">
+            </div>
+            <div class="form-group">
+                <label>이름 *</label>
+                <input type="text" name="memberName" required placeholder="이름 입력">
+            </div>
+            <div class="form-group">
+                <label>성별 *</label>
+                <select name="memberGender" required>
+                    <option value="">성별 선택</option>
+                    <option value="M">남</option>
+                    <option value="F">여</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>전화번호 *</label>
+                <input type="tel" name="memberPhone" required placeholder="010-0000-0000">
+            </div>
+            <div class="form-group">
+                <label>이메일 *</label>
+                <input type="email" name="memberEmail" required placeholder="example@email.com">
+            </div>
+            <button type="submit" class="btn">회원가입 완료</button>
+        </form>
+    </div>
+</div>
+<script th:if="${error}">alert("[[${error}]]");</script>
+</body>
+</html>

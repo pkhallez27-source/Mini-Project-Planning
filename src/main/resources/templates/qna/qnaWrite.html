@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restay - Q&A 문의 작성</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+          crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+
+  <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+          /*font-family: 'Noto Sans KR', sans-serif;*/
+          background-color: #f4f6f8;
+          color: #333;
+          margin: 0;
+          padding-bottom: 0;
+      }
+
+      .container-box {
+          max-width: 900px;
+          margin: 40px auto;
+          padding: 0 20px;
+      }
+
+      .card {
+          background-color: #ffffff;
+          border-radius: 8px;
+          padding: 35px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          border: none;
+      }
+
+      .section-title-wrap {
+          border-bottom: 2px solid #2e7d32;
+          padding-bottom: 12px;
+          margin-bottom: 30px;
+      }
+
+      .section-title {
+          font-size: 22px;
+          font-weight: 700;
+          color: #2e7d32;
+          margin: 0;
+      }
+
+      .form-group {
+          margin-bottom: 22px;
+      }
+
+      .form-group label {
+          display: block;
+          font-size: 15px;
+          font-weight: 600;
+          color: #444;
+          margin-bottom: 8px;
+      }
+
+      .form-control {
+          width: 100%;
+          padding: 12px 14px;
+          font-size: 14px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          outline: none;
+          transition: border-color 0.2s;
+          font-family: inherit;
+      }
+
+      .form-control:focus {
+          border-color: #2e7d32;
+          box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+      }
+
+      textarea.form-control {
+          resize: vertical;
+          min-height: 180px;
+      }
+
+      .btn-group-custom {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          margin-top: 30px;
+          padding-top: 20px;
+          border-top: 1px solid #eee;
+      }
+
+      .btn-custom-action {
+          padding: 10px 24px;
+          font-size: 14px;
+          font-weight: 600;
+          border-radius: 4px;
+          text-decoration: none;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.2s;
+      }
+
+      .btn-submit {
+          background-color: #2e7d32;
+          color: white;
+      }
+
+      .btn-submit:hover {
+          background-color: #1b5e20;
+          color: white;
+      }
+
+      .btn-cancel {
+          background-color: #757575;
+          color: white;
+      }
+
+      .btn-cancel:hover {
+          background-color: #616161;
+          color: white;
+      }
+
+      .admin-link {
+          font-size: 12px;
+          opacity: 0.7;
+          text-decoration: none;
+          color: rgba(0,0,0,0.6);
+          transition: opacity 0.2s;
+      }
+      .admin-link:hover { opacity: 1; color: #000; }
+      .header-auth-btn {
+          font-size: 13px !important;
+          padding: 6px 14px !important;
+          white-space: nowrap;
+          line-height: 1.5;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+      }
+  </style>
+</head>
+<body>
+<!-- 표준 헤더 적용 -->
+<header th:replace="~{layout/header::subHeader('qnabanner.png')}">
+<!--  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-2 w-100">-->
+<!--    <div class="container">-->
+<!--      <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-3 text-success" th:href="@{/#}">-->
+<!--        <i class="bi bi-tree-fill fs-2"></i> restay-->
+<!--      </a>-->
+<!--      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">-->
+<!--        <span class="navbar-toggler-icon"></span>-->
+<!--      </button>-->
+<!--      <div class="collapse navbar-collapse" id="mainNavbar">-->
+<!--        <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-4">-->
+<!--          <li class="nav-item"><a class="nav-link fw-semibold" th:href="@{/RoomIntro}">캠핑장 소개</a></li>-->
+<!--          <li class="nav-item"><a class="nav-link fw-semibold" th:href="@{/Facilities}">부대시설</a></li>-->
+<!--          <li class="nav-item"><a class="nav-link fw-semibold" th:href="@{/RoomList}">숙소 안내</a></li>-->
+<!--          <li class="nav-item"><a class="nav-link fw-semibold" th:href="@{/reservation}">실시간 예약</a></li>-->
+<!--          <li class="nav-item"><a class="nav-link fw-semibold" th:href="@{/qna/list}">고객센터</a></li>-->
+<!--        </ul>-->
+<!--        <div class="d-flex align-items-center gap-2">-->
+<!--          <div th:if="${session.loginUser != null}" class="d-flex align-items-center gap-2">-->
+<!--            <span th:text="${session.loginUser.memberName} + '님'" class="text-dark fw-semibold small text-nowrap"></span>-->
+<!--            <a th:href="@{/member/mypage}" class="btn btn-outline-success rounded-pill header-auth-btn">마이페이지</a>-->
+<!--            <a th:href="@{/member/logout}" class="btn btn-success rounded-pill text-white fw-semibold header-auth-btn">로그아웃</a>-->
+<!--          </div>-->
+<!--          <div th:if="${session.loginUser == null}" class="d-flex align-items-center gap-2">-->
+<!--            <a th:href="@{/member/login}" class="btn btn-outline-success rounded-pill header-auth-btn">로그인</a>-->
+<!--            <a th:href="@{/member/signup}" class="btn btn-success rounded-pill text-white fw-semibold header-auth-btn">회원가입</a>-->
+<!--          </div>-->
+<!--          <a th:href="@{/admin/login}" class="admin-link ms-1 text-nowrap">관리자</a>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </nav>-->
+</header>
+
+<div class="container-box">
+  <div class="card">
+    <div class="section-title-wrap">
+      <h2 class="section-title">Q&A 문의 작성</h2>
+    </div>
+
+    <form th:action="@{/qna/write}" method="post">
+      <div class="form-group">
+        <label for="title">제목</label>
+        <input type="text" id="title" name="title" class="form-control" placeholder="제목을 입력하세요" required>
+      </div>
+
+      <div class="form-group">
+        <label>작성자</label>
+        <!-- 로그인한 회원의 이름이 자동 입력되며 수정 불가 처리 -->
+        <input type="text" class="form-control bg-light" th:value="${session.loginUser != null ? session.loginUser.memberName : ''}" readonly>
+      </div>
+
+      <div class="form-group">
+        <label for="content">내용</label>
+        <textarea id="content" name="content" class="form-control" placeholder="내용을 입력하세요" required></textarea>
+      </div>
+
+      <div class="btn-group-custom">
+        <a th:href="@{/qna/list}" class="btn-custom-action btn-cancel">취소</a>
+        <button type="submit" class="btn-custom-action btn-submit">등록</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div th:replace="~{layout/footer :: footer}"></div>
+</body>
+</html>
