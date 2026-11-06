@@ -2,7 +2,7 @@
 FROM gradle:8.5-jdk17 AS build
 WORKDIR /app
 COPY --chown=gradle:gradle . .
-RUN gradle build -x test --no-daemon
+RUN gradle build -x test --no-daemon --stacktrace
 RUN rm -f build/libs/*-plain.jar
 
 # 2. 실행 환경 및 서버 가동
