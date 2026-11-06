@@ -1,9 +1,9 @@
-# 1. Java 17 빌드 환경 (Eclipse Temurin)
-FROM eclipse-temurin:17-jdk AS build
+# 1. Official Gradle 8.5 + Java 17 빌드 환경
+FROM gradle:8.5-jdk17 AS build
 WORKDIR /app
-COPY . .
-RUN chmod +x ./gradlew
-RUN ./gradlew build -x test --no-daemon --stacktrace
+COPY --chown=gradle:gradle . .
+RUN gradle build -x test --no-daemon
+RUN rm -f build/libs/*-plain.jar
 
 # 2. 실행 환경 및 서버 가동
 FROM eclipse-temurin:17-jre
